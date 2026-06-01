@@ -1,0 +1,8 @@
+{
+  "id": "dev.sinty.music",
+  "name": "Music",
+  "description": "Listen to your music collection",
+  "categories": ["AudioVideo", "Audio", "Player"],
+  "icon": "dev.sinty.music",
+  "exec": "singularity-music"
+}

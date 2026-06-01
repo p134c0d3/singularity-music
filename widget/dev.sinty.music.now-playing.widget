@@ -1,0 +1,8 @@
+[Widget]
+Id=music.now-playing
+ProviderId=dev.sinty.music
+Name=Now Playing
+IconName=audio-x-generic-symbolic
+Sizes=1x1;1x2;2x1;2x2
+Module=libsingularity-music-widget.so
+ModuleSymbol=singularity_music_widget_new
