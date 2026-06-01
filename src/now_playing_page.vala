@@ -97,7 +97,7 @@ namespace Singularity.Apps.Music {
             center.append (_cover_stack);
 
             // ── Track labels ──────────────────────────────────────────────
-            _title_lbl = new Label ("No track playing");
+            _title_lbl = new Label (_("No track playing"));
             _title_lbl.add_css_class ("music-now-title");
             _title_lbl.halign          = Align.CENTER;
             _title_lbl.ellipsize       = Pango.EllipsizeMode.END;
@@ -158,40 +158,40 @@ namespace Singularity.Apps.Music {
             _shuffle_btn.add_css_class ("flat");
             _shuffle_btn.add_css_class ("circular");
             _shuffle_btn.add_css_class ("music-ctrl");
-            _shuffle_btn.tooltip_text = "Shuffle";
+            _shuffle_btn.tooltip_text = _("Shuffle");
             _shuffle_btn.clicked.connect (() => shuffle_clicked ());
 
             var prev_btn = new Button.from_icon_name ("media-skip-backward-symbolic");
             prev_btn.add_css_class ("flat");
             prev_btn.add_css_class ("circular");
             prev_btn.add_css_class ("music-ctrl");
-            prev_btn.tooltip_text = "Previous";
+            prev_btn.tooltip_text = _("Previous");
             prev_btn.clicked.connect (() => prev_clicked ());
 
             _play_btn = new Button.from_icon_name ("media-playback-start-symbolic");
             _play_btn.add_css_class ("music-play-btn");
-            _play_btn.tooltip_text = "Play / Pause";
+            _play_btn.tooltip_text = _("Play / Pause");
             _play_btn.clicked.connect (() => play_pause_clicked ());
 
             var next_btn = new Button.from_icon_name ("media-skip-forward-symbolic");
             next_btn.add_css_class ("flat");
             next_btn.add_css_class ("circular");
             next_btn.add_css_class ("music-ctrl");
-            next_btn.tooltip_text = "Next";
+            next_btn.tooltip_text = _("Next");
             next_btn.clicked.connect (() => next_clicked ());
 
             _repeat_btn = new Button.from_icon_name ("media-playlist-repeat-symbolic");
             _repeat_btn.add_css_class ("flat");
             _repeat_btn.add_css_class ("circular");
             _repeat_btn.add_css_class ("music-ctrl");
-            _repeat_btn.tooltip_text = "Repeat";
+            _repeat_btn.tooltip_text = _("Repeat");
             _repeat_btn.clicked.connect (() => repeat_clicked ());
 
             playlist_btn = new Button.from_icon_name ("view-list-symbolic");
             playlist_btn.add_css_class ("flat");
             playlist_btn.add_css_class ("circular");
             playlist_btn.add_css_class ("music-ctrl");
-            playlist_btn.tooltip_text = "Playlist";
+            playlist_btn.tooltip_text = _("Playlist");
 
             ctrl.append (_shuffle_btn);
             ctrl.append (prev_btn);
@@ -229,7 +229,7 @@ namespace Singularity.Apps.Music {
 
         public void update_track (TrackInfo? track) {
             if (track == null) {
-                _title_lbl.label  = "No track playing";
+                _title_lbl.label  = _("No track playing");
                 _artist_lbl.label = "";
                 _album_lbl.label  = "";
                 _cover_stack.visible_child_name = "icon";
@@ -239,7 +239,7 @@ namespace Singularity.Apps.Music {
             }
             _title_lbl.label  = track.title;
             _artist_lbl.label = track.artist;
-            _album_lbl.label  = (track.album != "Unknown Album") ? track.album : "";
+            _album_lbl.label  = (track.album != _("Unknown Album")) ? track.album : "";
             if (track.cover != null) {
                 _cover_pic.paintable = track.cover;
                 _cover_stack.visible_child_name = "art";

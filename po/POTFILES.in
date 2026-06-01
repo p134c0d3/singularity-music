@@ -1,0 +1,9 @@
+# List of source files containing translatable strings.
+src/gst_audio_player.vala
+src/main.vala
+src/mini_player.vala
+src/mpris_exporter.vala
+src/music_window.vala
+src/now_playing_page.vala
+src/playlist.vala
+src/track_info.vala

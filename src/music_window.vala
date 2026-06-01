@@ -68,8 +68,8 @@ namespace Singularity.Apps.Music {
             // ── Welcome page ─────────────────────────────────────────────────
             var wp = new Singularity.Widgets.WelcomePage ();
             wp.app_icon_name = "dev.sinty.music";
-            wp.title    = "Music";
-            wp.subtitle = "Play your music collection";
+            wp.title    = _("Music");
+            wp.subtitle = _("Play your music collection");
             wp.add_action (
                 "document-open-symbolic",
                 "Open Files",
@@ -126,7 +126,7 @@ namespace Singularity.Apps.Music {
                 header.margin_top    = 8;
                 header.margin_bottom = 4;
 
-                var lbl = new Label ("Playlist");
+                var lbl = new Label (_("Playlist"));
                 lbl.add_css_class ("heading");
                 lbl.halign  = Align.START;
                 lbl.hexpand = true;
@@ -134,7 +134,7 @@ namespace Singularity.Apps.Music {
 
                 var add_btn = new Button.from_icon_name ("list-add-symbolic");
                 add_btn.add_css_class ("flat");
-                add_btn.tooltip_text = "Add Files";
+                add_btn.tooltip_text = _("Add Files");
                 add_btn.clicked.connect (() => {
                     _playlist_popover.popdown ();
                     _open_files ();
@@ -143,7 +143,7 @@ namespace Singularity.Apps.Music {
 
                 var clear_btn = new Button.from_icon_name ("edit-clear-all-symbolic");
                 clear_btn.add_css_class ("flat");
-                clear_btn.tooltip_text = "Clear Playlist";
+                clear_btn.tooltip_text = _("Clear Playlist");
                 clear_btn.clicked.connect (() => {
                     _playlist_popover.popdown ();
                     _playlist.clear ();
@@ -272,7 +272,7 @@ namespace Singularity.Apps.Music {
             tl.halign    = Align.START;
             tl.ellipsize = Pango.EllipsizeMode.END;
 
-            var al = new Label (track.artist != "Unknown Artist" ? track.artist : "");
+            var al = new Label (track.artist != _("Unknown Artist") ? track.artist : "");
             al.halign = Align.START;
             al.add_css_class ("dim-label");
             al.add_css_class ("caption");
@@ -358,7 +358,7 @@ namespace Singularity.Apps.Music {
 
         private void _open_files () {
             var dialog = new FileDialog ();
-            dialog.title = "Open Audio Files";
+            dialog.title = _("Open Audio Files");
             var filters      = new GLib.ListStore (typeof (FileFilter));
             var audio_filter = new FileFilter ();
             audio_filter.name = "Audio Files";

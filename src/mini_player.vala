@@ -46,7 +46,7 @@ namespace Singularity.Apps.Music {
             info_box.hexpand = true;
             info_box.margin_end = 8;
 
-            _title_lbl = new Label ("No track playing");
+            _title_lbl = new Label (_("No track playing"));
             _title_lbl.add_css_class ("mini-player-title");
             _title_lbl.halign = Align.START;
             _title_lbl.ellipsize = Pango.EllipsizeMode.END;
@@ -98,7 +98,7 @@ namespace Singularity.Apps.Music {
             var expand_btn = new Button.from_icon_name ("view-restore-symbolic");
             expand_btn.add_css_class ("flat");
             expand_btn.add_css_class ("circular");
-            expand_btn.tooltip_text = "Open full player";
+            expand_btn.tooltip_text = _("Open full player");
             expand_btn.clicked.connect (() => expand_clicked ());
 
             ctrl_box.append (prev_btn);
@@ -112,7 +112,7 @@ namespace Singularity.Apps.Music {
 
         public void update_track (TrackInfo? track) {
             if (track == null) {
-                _title_lbl.label = "No track playing";
+                _title_lbl.label = _("No track playing");
                 _artist_lbl.label = "";
                 _cover_img.icon_name = "audio-x-generic-symbolic";
                 _cover_img.paintable = null;
