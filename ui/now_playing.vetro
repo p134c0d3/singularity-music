@@ -1,0 +1,54 @@
+Template(class: "SingularityAppsMusicNowPlayingPage", parent: "GtkBox") {
+    VBox(halign: "center", valign: "center", hexpand: true, vexpand: true,
+         marginStart: 64, marginEnd: 64, marginTop: 24, marginBottom: 24) {
+
+        Stack(id: "cover_stack", halign: "center",
+              widthRequest: 160, heightRequest: 160, marginBottom: 28)
+            .cssClass("music-now-cover")
+
+        Label(id: "title_lbl", label: "No track playing", halign: "center",
+              ellipsize: "end", maxWidthChars: 32, marginBottom: 4)
+            .cssClass("music-now-title").translatable("label")
+
+        Label(id: "artist_lbl", label: "", halign: "center",
+              ellipsize: "end", maxWidthChars: 32, marginBottom: 2)
+            .cssClass("music-now-artist")
+
+        Label(id: "album_lbl", label: "", halign: "center",
+              ellipsize: "end", maxWidthChars: 32, marginBottom: 24)
+            .cssClass("music-now-album")
+
+        HBox(id: "seek_row", spacing: 8, hexpand: true, marginBottom: 16) {
+            Label(id: "pos_lbl", label: "0:00", widthChars: 5).cssClass("music-time")
+            Scale(id: "seek_bar", orientation: "horizontal", drawValue: false, hexpand: true)
+            Label(id: "dur_lbl", label: "0:00", widthChars: 5).cssClass("music-time")
+        }
+
+        HBox(id: "controls_row", spacing: 12, halign: "center", marginBottom: 20) {
+            Button(id: "shuffle_btn", iconName: "media-playlist-shuffle-symbolic",
+                   tooltipText: "Shuffle")
+                .cssClass("flat").cssClass("circular").cssClass("music-ctrl").translatable("tooltipText")
+            Button(id: "prev_btn", iconName: "media-skip-backward-symbolic",
+                   tooltipText: "Previous")
+                .cssClass("flat").cssClass("circular").cssClass("music-ctrl").translatable("tooltipText")
+            Button(id: "play_btn", iconName: "media-playback-start-symbolic",
+                   tooltipText: "Play / Pause")
+                .cssClass("music-play-btn").translatable("tooltipText")
+            Button(id: "next_btn", iconName: "media-skip-forward-symbolic",
+                   tooltipText: "Next")
+                .cssClass("flat").cssClass("circular").cssClass("music-ctrl").translatable("tooltipText")
+            Button(id: "repeat_btn", iconName: "media-playlist-repeat-symbolic",
+                   tooltipText: "Repeat")
+                .cssClass("flat").cssClass("circular").cssClass("music-ctrl").translatable("tooltipText")
+            Button(id: "playlist_btn", iconName: "view-list-symbolic",
+                   tooltipText: "Playlist")
+                .cssClass("flat").cssClass("circular").cssClass("music-ctrl").translatable("tooltipText")
+        }
+
+        HBox(id: "vol_row", spacing: 8, halign: "center") {
+            Image(id: "vol_lo", iconName: "audio-volume-low-symbolic")
+            Scale(id: "vol_slider", orientation: "horizontal", drawValue: false, widthRequest: 120)
+            Image(id: "vol_hi", iconName: "audio-volume-high-symbolic")
+        }
+    }
+}

@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/dev/sinty/music">
     <file>data/icons/dev.sinty.music.svg</file>
+    <file preprocess="xml-stripblanks">ui/now_playing.ui</file>
   </gresource>
 </gresources>

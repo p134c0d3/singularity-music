@@ -6,13 +6,11 @@ namespace Singularity.Apps.Music {
     /**
      * Full-screen now-playing widget.
      *
-     * • Draws album art as a full-bleed dimmed background via snapshot()
-     *   (same technique as MediaPlayerCard in libsingularity).
-     * • Extracts the dominant colour from the cover art and applies it as
-     *   the accent for the play button, seek bar highlight, and shuffle/repeat
-     *   active indicators - falling back to @accent_color when no art is loaded.
-     * • Exposes a `playlist_btn` that callers can anchor a playlist popover to.
+     * The static layout lives in ui/now_playing.vetro; this class draws the
+     * album-art background via snapshot(), extracts the dominant cover colour
+     * as an accent, and wires the transport signals.
      */
+    [GtkTemplate(ui = "/dev/sinty/music/ui/now_playing.ui")]
     public class NowPlayingPage : Gtk.Box {
 
         // ── Background / accent ───────────────────────────────────────────
@@ -20,25 +18,30 @@ namespace Singularity.Apps.Music {
         private Gtk.CssProvider?    _css_provider = null;
 
         // ── Cover art ────────────────────────────────────────────────────
-        private Stack    _cover_stack;
-        private Picture  _cover_pic;
+        [GtkChild (name = "cover_stack")] unowned Stack _cover_stack;
+        private Picture          _cover_pic;
 
         // ── Labels ───────────────────────────────────────────────────────
-        private Label _title_lbl;
-        private Label _artist_lbl;
-        private Label _album_lbl;
+        [GtkChild (name = "title_lbl")]  unowned Label _title_lbl;
+        [GtkChild (name = "artist_lbl")] unowned Label _artist_lbl;
+        [GtkChild (name = "album_lbl")]  unowned Label _album_lbl;
 
         // ── Transport ────────────────────────────────────────────────────
-        private Scale  _seek_bar;
-        private Label  _pos_lbl;
-        private Label  _dur_lbl;
-        private Button _play_btn;
-        private Button _shuffle_btn;
-        private Button _repeat_btn;
-        private bool   _seeking = false;
+        [GtkChild (name = "seek_bar")]    unowned Scale  _seek_bar;
+        [GtkChild (name = "pos_lbl")]     unowned Label  _pos_lbl;
+        [GtkChild (name = "dur_lbl")]     unowned Label  _dur_lbl;
+        [GtkChild (name = "play_btn")]    unowned Button _play_btn;
+        [GtkChild (name = "shuffle_btn")] unowned Button _shuffle_btn;
+        [GtkChild (name = "prev_btn")]    unowned Button _prev_btn;
+        [GtkChild (name = "next_btn")]    unowned Button _next_btn;
+        [GtkChild (name = "repeat_btn")]  unowned Button _repeat_btn;
+        [GtkChild (name = "vol_lo")]      unowned Image  _vol_lo;
+        [GtkChild (name = "vol_hi")]      unowned Image  _vol_hi;
+        [GtkChild (name = "vol_slider")]  unowned Scale  _vol_slider;
+        private bool _seeking = false;
 
         /** Button to anchor the playlist popover. */
-        public Button playlist_btn { get; private set; }
+        [GtkChild] public unowned Button playlist_btn;
 
         // ── Signals ──────────────────────────────────────────────────────
         public signal void play_pause_clicked ();
@@ -57,30 +60,8 @@ namespace Singularity.Apps.Music {
             hexpand   = true;
             vexpand   = true;
             add_css_class ("music-now-playing");
-            _build ();
-        }
 
-        // ── Layout ───────────────────────────────────────────────────────
-
-        private void _build () {
-            var center = new Box (Orientation.VERTICAL, 0);
-            center.valign        = Align.CENTER;
-            center.halign        = Align.CENTER;
-            center.hexpand       = true;
-            center.vexpand       = true;
-            center.margin_start  = 64;
-            center.margin_end    = 64;
-            center.margin_top    = 24;
-            center.margin_bottom = 24;
-
-            // ── Cover art (240 × 240, rounded, shadowed) ──────────────────
-            _cover_stack = new Stack ();
-            _cover_stack.halign = Align.CENTER;
-            _cover_stack.set_size_request (160, 160);
-            _cover_stack.overflow = Overflow.HIDDEN;
-            _cover_stack.add_css_class ("music-now-cover");
-            _cover_stack.margin_bottom = 28;
-
+            // Cover-art stack pages (Gtk.Stack named children built here).
             var fallback = new Image.from_icon_name ("audio-x-generic-symbolic");
             fallback.pixel_size = 96;
             fallback.valign     = Align.CENTER;
@@ -93,136 +74,28 @@ namespace Singularity.Apps.Music {
             _cover_pic.can_shrink  = true;
             _cover_stack.add_named (_cover_pic, "art");
             _cover_stack.visible_child_name = "icon";
+            _cover_stack.overflow = Overflow.HIDDEN;
 
-            center.append (_cover_stack);
+            _vol_lo.opacity = 0.7;
+            _vol_hi.opacity = 0.7;
 
-            // ── Track labels ──────────────────────────────────────────────
-            _title_lbl = new Label (_("No track playing"));
-            _title_lbl.add_css_class ("music-now-title");
-            _title_lbl.halign          = Align.CENTER;
-            _title_lbl.ellipsize       = Pango.EllipsizeMode.END;
-            _title_lbl.max_width_chars = 32;
-            _title_lbl.margin_bottom   = 4;
-            center.append (_title_lbl);
-
-            _artist_lbl = new Label ("");
-            _artist_lbl.add_css_class ("music-now-artist");
-            _artist_lbl.halign          = Align.CENTER;
-            _artist_lbl.ellipsize       = Pango.EllipsizeMode.END;
-            _artist_lbl.max_width_chars = 32;
-            _artist_lbl.margin_bottom   = 2;
-            center.append (_artist_lbl);
-
-            _album_lbl = new Label ("");
-            _album_lbl.add_css_class ("music-now-album");
-            _album_lbl.halign           = Align.CENTER;
-            _album_lbl.ellipsize        = Pango.EllipsizeMode.END;
-            _album_lbl.max_width_chars  = 32;
-            _album_lbl.margin_bottom    = 24;
-            center.append (_album_lbl);
-
-            // ── Seek bar ──────────────────────────────────────────────────
-            var seek_row = new Box (Orientation.HORIZONTAL, 8);
-            seek_row.hexpand       = true;
-            seek_row.margin_bottom = 16;
-
-            _pos_lbl = new Label ("0:00");
-            _pos_lbl.add_css_class ("music-time");
-            _pos_lbl.width_chars = 5;
-
-            _seek_bar = new Scale.with_range (Orientation.HORIZONTAL, 0, 1, 0.001);
-            _seek_bar.draw_value = false;
-            _seek_bar.hexpand    = true;
+            // Transport wiring.
+            _seek_bar.set_range (0, 1);
             _seek_bar.change_value.connect ((scroll, val) => {
                 _seeking = true;
                 seek_requested (val.clamp (0, 1));
                 _seeking = false;
                 return false;
             });
-
-            _dur_lbl = new Label ("0:00");
-            _dur_lbl.add_css_class ("music-time");
-            _dur_lbl.width_chars = 5;
-
-            seek_row.append (_pos_lbl);
-            seek_row.append (_seek_bar);
-            seek_row.append (_dur_lbl);
-            center.append (seek_row);
-
-            // ── Controls ──────────────────────────────────────────────────
-            var ctrl = new Box (Orientation.HORIZONTAL, 12);
-            ctrl.halign        = Align.CENTER;
-            ctrl.margin_bottom = 20;
-
-            _shuffle_btn = new Button.from_icon_name ("media-playlist-shuffle-symbolic");
-            _shuffle_btn.add_css_class ("flat");
-            _shuffle_btn.add_css_class ("circular");
-            _shuffle_btn.add_css_class ("music-ctrl");
-            _shuffle_btn.tooltip_text = _("Shuffle");
             _shuffle_btn.clicked.connect (() => shuffle_clicked ());
-
-            var prev_btn = new Button.from_icon_name ("media-skip-backward-symbolic");
-            prev_btn.add_css_class ("flat");
-            prev_btn.add_css_class ("circular");
-            prev_btn.add_css_class ("music-ctrl");
-            prev_btn.tooltip_text = _("Previous");
-            prev_btn.clicked.connect (() => prev_clicked ());
-
-            _play_btn = new Button.from_icon_name ("media-playback-start-symbolic");
-            _play_btn.add_css_class ("music-play-btn");
-            _play_btn.tooltip_text = _("Play / Pause");
+            _prev_btn.clicked.connect (() => prev_clicked ());
             _play_btn.clicked.connect (() => play_pause_clicked ());
-
-            var next_btn = new Button.from_icon_name ("media-skip-forward-symbolic");
-            next_btn.add_css_class ("flat");
-            next_btn.add_css_class ("circular");
-            next_btn.add_css_class ("music-ctrl");
-            next_btn.tooltip_text = _("Next");
-            next_btn.clicked.connect (() => next_clicked ());
-
-            _repeat_btn = new Button.from_icon_name ("media-playlist-repeat-symbolic");
-            _repeat_btn.add_css_class ("flat");
-            _repeat_btn.add_css_class ("circular");
-            _repeat_btn.add_css_class ("music-ctrl");
-            _repeat_btn.tooltip_text = _("Repeat");
+            _next_btn.clicked.connect (() => next_clicked ());
             _repeat_btn.clicked.connect (() => repeat_clicked ());
 
-            playlist_btn = new Button.from_icon_name ("view-list-symbolic");
-            playlist_btn.add_css_class ("flat");
-            playlist_btn.add_css_class ("circular");
-            playlist_btn.add_css_class ("music-ctrl");
-            playlist_btn.tooltip_text = _("Playlist");
-
-            ctrl.append (_shuffle_btn);
-            ctrl.append (prev_btn);
-            ctrl.append (_play_btn);
-            ctrl.append (next_btn);
-            ctrl.append (_repeat_btn);
-            ctrl.append (playlist_btn);
-            center.append (ctrl);
-
-            // ── Volume ────────────────────────────────────────────────────
-            var vol_row = new Box (Orientation.HORIZONTAL, 8);
-            vol_row.halign = Align.CENTER;
-
-            var vol_lo = new Image.from_icon_name ("audio-volume-low-symbolic");
-            vol_lo.opacity = 0.7;
-
-            var vol_slider = new Scale.with_range (Orientation.HORIZONTAL, 0, 1, 0.01);
-            vol_slider.set_value (1.0);
-            vol_slider.draw_value    = false;
-            vol_slider.width_request = 120;
-            vol_slider.value_changed.connect (() => volume_changed (vol_slider.get_value ()));
-
-            var vol_hi = new Image.from_icon_name ("audio-volume-high-symbolic");
-            vol_hi.opacity = 0.7;
-
-            vol_row.append (vol_lo);
-            vol_row.append (vol_slider);
-            vol_row.append (vol_hi);
-            center.append (vol_row);
-
-            append (center);
+            _vol_slider.set_range (0, 1);
+            _vol_slider.set_value (1.0);
+            _vol_slider.value_changed.connect (() => volume_changed (_vol_slider.get_value ()));
         }
 
         // ── Public update API ─────────────────────────────────────────────
